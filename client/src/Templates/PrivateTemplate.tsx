@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import Sidebar from "Containers/Sidebar";
 import Navbar from "Containers/Navbar";
-import { setUser } from "Redux/reducers/userSlice";
 import { AppDispatch } from "Redux/store";
 import { fetchJournals } from "Redux/reducers/journalSlice";
 import jwtDecode from "jwt-decode";
@@ -20,22 +19,26 @@ const PrivateTemplate: React.FC<privateTemplateProps> = (props: privateTemplateP
   useEffect(() => {
 
     const token = localStorage.getItem('token'); 
-
+    console.log(token)
     if (token) {
       try {
         const decodedToken: any = jwtDecode(token);
-
+        console.log("token: ", decodedToken)
         // Check if the token is not expired
         const currentTime = Date.now() / 1000; 
+        console.log(decodedToken.exp);
+        console.log(currentTime);
         if (decodedToken.exp > currentTime) {
-          const { username, email } = decodedToken;
-          dispatch(setUser({ userId: token, displayName: username, email }));
           dispatch(fetchJournals());
+          console.log(token);
         }
       } catch (error) {
         console.error('Invalid token:', error);
         navigate("/login");
       }
+    }
+    else {
+      navigate("/login");
     }
 
   }, []);

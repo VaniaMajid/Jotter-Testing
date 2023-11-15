@@ -12,6 +12,7 @@ export default function ViewJournals() {
   
   useEffect(() => {
     dispatch(fetchJournals());
+    console.log("journal")
   }, [dispatch]);
 
   const journals = useSelector((state: RootState) => state.journal.journals);
@@ -21,7 +22,7 @@ export default function ViewJournals() {
 
   return (
     <JournalsSection>
-      {loading === "succeeded"? (
+      {loading !== "pending"? (
         <>
           <StyledHeader>Your Journals</StyledHeader>
           <Divider />

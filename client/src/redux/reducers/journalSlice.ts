@@ -1,9 +1,9 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import jwtDecode from "jwt-decode"; // Import the jwt-decode library
+import jwtDecode from "jwt-decode";
 
 
 const API_URL = "http://localhost:5000/journals"; 
-const decodedToken: any = jwtDecode(localStorage.getItem("token") || "");
+
 
 interface JournalData {
   _id: string;
@@ -27,23 +27,29 @@ const initialState: JournalState = {
 };
 
 export const fetchJournals = createAsyncThunk("journal/fetchJournals", async () => {
-  try {
-    const userId = decodedToken.userId; // Extract user ID from the decoded token
-
-    // Make the API request using the fetch API
-    const response = await fetch(`${API_URL}/${userId}`);
-
-    if (!response.ok) {
-      throw new Error(`Request failed with status: ${response.status}`);
+  const decodedToken: any = jwtDecode(localStorage.getItem("token") || "");
+  console.log("token: ",decodedToken);
+  
+    try {
+      const userId = decodedToken.userId; // Extract user ID from the decoded token
+  
+      // Make the API request using the fetch API
+      const response = await fetch(`${API_URL}/${userId}`);
+  
+      if (!response.ok) {
+        throw new Error(`Request failed with status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      console.log("data: ",data);
+      return data;
+    } catch (error) {
+      throw error;
     }
-
-    const data = await response.json();
-    console.log(data)
-    return data;
-  } catch (error) {
-    throw error;
-  }
+    
 });
+
+
 
 export const journalSlice = createSlice({
   name: "journal",

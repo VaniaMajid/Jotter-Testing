@@ -21,7 +21,7 @@ function Navbar() {
 
   const handleLogout = () => {
     setConfirmLoading(true);
-    localStorage.setItem('token', '');
+    localStorage.removeItem('token');
     navigate("/login");
   };
 

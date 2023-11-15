@@ -1,7 +1,4 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { useEffect } from "react";
-import { useDispatch } from "react-redux";
-import { setUser } from "Redux/reducers/userSlice";
 import PublicTemplate from "Templates/PublicTemplate";
 import LoginForm from "Containers/Login";
 import SignUpForm from "Containers/Signup";
@@ -9,32 +6,11 @@ import ViewJournals from "Containers/ViewJournals";
 import AddNewJournal from "Containers/AddJournal";
 import JournalCont from "Containers/JournalContainer";
 import PrivateTemplate from "Templates/PrivateTemplate";
-import { AppDispatch } from "Redux/store";
-import jwtDecode from 'jwt-decode'; 
+import EditJournal from "Containers/EditJournal";
 
 function App() {
-  const dispatch: AppDispatch = useDispatch();
-
-  useEffect(() => {
-
-    const token = localStorage.getItem('token'); 
-
-    if (token) {
-      try {
-        const decodedToken: any = jwtDecode(token);
-
-        // Check if the token is not expired
-        const currentTime = Date.now() / 1000; 
-        if (decodedToken.exp > currentTime) {
-          const { username, email } = decodedToken;
-          dispatch(setUser({ userId: token, displayName: username, email }));
-        }
-      } catch (error) {
-        console.error('Invalid token:', error);
-      }
-    }
-
-  }, []);
+  console.log('reached in app.tsx')
+  
 
   const privateRoutes = [
     {
@@ -54,13 +30,18 @@ function App() {
     },
     {
       key: 4,
-      path: "/createjournal/:journalId?",
+      path: "/createjournal",
       element: <AddNewJournal />,
     },
     {
       key: 5,
       path: "/:journalId",
       element: <JournalCont />,
+    },
+    {
+      key: 4,
+      path: "/editjournal/:journalId",
+      element: <EditJournal />,
     },
   ];
 

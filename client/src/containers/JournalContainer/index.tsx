@@ -1,4 +1,4 @@
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Popconfirm, Popover, Spin } from "antd";
@@ -15,8 +15,10 @@ import {
   StyledImageSection,
 } from "Containers/JournalContainer/journalCont.style";
 import { StyledHeader } from "Components/Header/header.style";
-import { AppDispatch, RootState } from "Redux/store";
+import { AppDispatch } from "Redux/store";
 import { fetchJournals } from "Redux/reducers/journalSlice";
+import axios from "axios";
+
 
 interface JournalData {
   _id: string;
@@ -57,18 +59,27 @@ function JournalCont () {
   }, [dispatch]);
 
   const editJournal = async () => {
-    navigate(`/createjournal/${journalId}`);
+    navigate(`/editjournal/${journalId}`);
   };
 
   const deleteJournal = async () => {
-    // await deleteDoc(
-    //   doc(database, `journals/${user.userId}/entries/${journalId}`)
-    // );
-    
-    // dispatch(fetchJournals(auth.currentUser!.uid));
-    navigate("/");
+    try {
+      // Send a request to delete the journal entry
+      const response = await axios.delete(`http://localhost:5000/delete-journal/${journalId}`);
+  
+      if (response.status === 200) {
+        // Journal deleted successfully, navigate to the desired route
+        navigate("/");
+      } else {
+        console.error('Error deleting journal:', response.data.message);
+        // Handle the error as needed
+      }
+    } catch (error) {
+      console.error('Error deleting journal:', error);
+      // Handle the error as needed
+    }
   };
-
+  
   const content = (
     <ActionButtonCont>
       <ActionButton onClick={editJournal} icon={<EditOutlined />}>

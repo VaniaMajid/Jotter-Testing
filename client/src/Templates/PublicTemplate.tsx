@@ -1,13 +1,7 @@
-// import { useDispatch } from 'react-redux'
+
 import heroImage from "Assets/heroImage.png";
 import logo from "Assets/logo.png";
 import { StyledSection } from "Templates/publicTemplate.style";
-// import { AppDispatch } from '../redux/store'
-// import { useNavigate } from 'react-router-dom'
-// import { onAuthStateChanged } from 'firebase/auth'
-// import { auth } from '../firebase/config'
-// import { useEffect } from 'react'
-// import { setUser } from '../redux/reducers/userSlice'
 
 type publicTempateProps = {
   children?: any

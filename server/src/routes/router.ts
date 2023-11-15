@@ -7,6 +7,7 @@ import jwt from 'jsonwebtoken';
 import User from '../models/User'; 
 import JournalModel, { IJournal } from '../models/Journals';
 import multer from 'multer';
+const fs = require('fs');
 
 
 
@@ -27,6 +28,17 @@ dotenv.config();
 const router = express.Router();
 
 //GET METHODS
+
+router.get('/', async (req: Request, res: Response) => {
+  try {
+    res.send('hello');
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+
 router.get('/journals/:userId', async (req: Request, res: Response) => {
     try {
       const userId = req.params.userId;
@@ -102,7 +114,7 @@ router.post(
   
         // Create a JWT token and send it to the client
         const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET!, {
-          expiresIn: '90', // Token expiration time
+          expiresIn: '90d', // Token expiration time
         });
         const username = user.username; 
         res.json({ token, username });
@@ -118,7 +130,7 @@ router.post(
 router.post('/create-journal', upload.array('images', 3), async (req: Request, res: Response) => {
     const { userId, title, description, timestamp } = req.body;
     console.log('Received request body:', req.body);
-console.log('Received files:', req.body.images);
+    console.log('Received files:', req.body.images);
     if (!req.files || !Array.isArray(req.files)) {
       return res.status(400).json({ message: 'No files uploaded.' });
     }
@@ -140,6 +152,77 @@ console.log('Received files:', req.body.images);
 
     res.status(201).json({ message: 'Journal created successfully.' });
     console.log(doc);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+
+// Route for updating an existing journal entry
+router.put('/update-journal/:journalId', upload.array('images', 3), async (req, res) => {
+  const { userId, title, description, timestamp } = req.body;
+  const journalId = req.params.journalId;
+
+  console.log('Received request body:', req.body);
+  console.log('Received files:', req.files);
+
+  if (!req.files || !Array.isArray(req.files)) {
+    return res.status(400).json({ message: 'No files uploaded.' });
+  }
+
+  try {
+    // Find the existing journal document by ID
+    const existingJournal = await JournalModel.findById(journalId);
+
+    if (!existingJournal) {
+      return res.status(404).json({ message: 'Journal not found.' });
+    }
+
+    // Remove existing images if requested
+    if (existingJournal.images && existingJournal.images.length > 0) {
+      existingJournal.images.forEach((filename) => {
+        const filePath = `uploads/${filename}`;
+        fs.unlinkSync(filePath); // Synchronously delete the file
+      });
+
+      // Clear the images array
+      existingJournal.images = [];
+    }
+
+    // Only update images if new ones are provided
+    const images = req.files.map((file) => file.filename);
+    existingJournal.images = images;
+
+    // Update the existing journal document
+    existingJournal.userId = userId;
+    existingJournal.title = title;
+    existingJournal.description = description;
+    existingJournal.timestamp = timestamp;
+
+    const updatedJournal = await existingJournal.save();
+
+    res.status(200).json({ message: 'Journal updated successfully.', updatedJournal });
+    console.log(updatedJournal);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error.' });
+  }
+});
+
+// Route for deleting a journal entry
+router.delete('/delete-journal/:journalId', async (req, res) => {
+  const journalId = req.params.journalId;
+
+  try {
+    // Find the journal entry by ID and delete it
+    const deletedJournal = await JournalModel.findByIdAndDelete(journalId);
+
+    if (!deletedJournal) {
+      return res.status(404).json({ message: 'Journal not found.' });
+    }
+
+    res.status(200).json({ message: 'Journal deleted successfully.', deletedJournal });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error.' });
